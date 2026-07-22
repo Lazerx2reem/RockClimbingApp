@@ -22,32 +22,35 @@ AI-powered video analysis of climbing attempts.
 
 ## Quickstart
 
-### 1. Database
+### 1. One-time setup
 
 ```bash
+# Database — either run Postgres via Docker:
 docker compose up -d db
-```
+# ...or skip Docker and use SQLite for local dev:
+echo 'DATABASE_URL=sqlite:///./dev.db' > backend/.env
 
-### 2. Backend (http://localhost:8000)
-
-```bash
+# Backend deps (3.12: MediaPipe in phase 2 needs <=3.12)
 cd backend
-python3.12 -m venv .venv && source .venv/bin/activate   # 3.12: MediaPipe (phase 2) needs <=3.12
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 alembic upgrade head          # apply migrations
 python -m app.seed            # optional: demo user + realistic mock data
-uvicorn app.main:app --reload
+cd ..
+
+# Frontend + root deps
+npm install
+cd frontend && npm install && cd ..
 ```
 
-API docs at http://localhost:8000/docs.
-
-### 3. Frontend (http://localhost:3000)
+### 2. Run everything
 
 ```bash
-cd frontend
-npm install
-npm run dev
+npm run dev    # FastAPI on :8000 + Next.js on :3000, one terminal
 ```
+
+API docs at http://localhost:8000/docs, app at http://localhost:3000.
+(`npm run dev:api` / `npm run dev:web` still run either half alone.)
 
 ### Demo login (after seeding)
 
