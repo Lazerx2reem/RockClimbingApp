@@ -32,7 +32,7 @@ docker compose up -d db
 
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
+python3.12 -m venv .venv && source .venv/bin/activate   # 3.12: MediaPipe (phase 2) needs <=3.12
 pip install -r requirements.txt
 alembic upgrade head          # apply migrations
 python -m app.seed            # optional: demo user + realistic mock data
