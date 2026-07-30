@@ -14,15 +14,14 @@ const SEND_LABELS: Record<SendType, string> = {
 };
 
 const SEND_STYLES: Record<SendType, string> = {
-  flash: "bg-amber-100 text-amber-800",
-  onsight: "bg-amber-100 text-amber-800",
-  redpoint: "bg-emerald-100 text-emerald-800",
-  repeat: "bg-sky-100 text-sky-800",
-  project: "bg-stone-200 text-stone-600",
+  flash: "bg-sage-200 text-sage-800",
+  onsight: "bg-sage-200 text-sage-800",
+  redpoint: "bg-lake-100 text-lake-700",
+  repeat: "bg-lake-50 text-lake-600",
+  project: "bg-steel-100 text-steel-500",
 };
 
-const inputCls =
-  "mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none";
+const inputCls = "field";
 
 export default function LogbookPage() {
   const [climbs, setClimbs] = useState<Climb[] | null>(null);
@@ -95,11 +94,8 @@ export default function LogbookPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Logbook</h1>
-        <button
-          onClick={() => setShowForm((s) => !s)}
-          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
-        >
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Logbook</h1>
+        <button onClick={() => setShowForm((s) => !s)} className="btn-primary">
           {showForm ? "Cancel" : "Log a climb"}
         </button>
       </div>
@@ -109,7 +105,7 @@ export default function LogbookPage() {
       {showForm && (
         <form
           onSubmit={onSubmit}
-          className="mt-4 grid grid-cols-1 gap-4 rounded-xl border border-stone-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="card mt-4 grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3"
         >
           <label className="block sm:col-span-2 lg:col-span-1">
             <span className="text-sm font-medium">Name</span>
@@ -216,11 +212,7 @@ export default function LogbookPage() {
             />
           </label>
           <div className="sm:col-span-2 lg:col-span-3">
-            <button
-              type="submit"
-              disabled={busy}
-              className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
-            >
+            <button type="submit" disabled={busy} className="btn-primary">
               {busy ? "Saving…" : "Save climb"}
             </button>
           </div>
@@ -228,23 +220,23 @@ export default function LogbookPage() {
       )}
 
       <div className="mt-4 space-y-2">
-        {climbs === null && <p className="text-sm text-stone-400">Loading…</p>}
+        {climbs === null && <p className="text-sm text-steel-400">Loading…</p>}
         {climbs?.length === 0 && (
-          <p className="rounded-xl border border-dashed border-stone-300 p-8 text-center text-sm text-stone-500">
+          <p className="rounded-2xl border border-dashed border-steel-300 bg-white/60 p-8 text-center text-sm text-steel-500">
             No climbs yet — log your first one!
           </p>
         )}
         {climbs?.map((climb) => (
           <div
             key={climb.id}
-            className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-stone-200 bg-white px-4 py-3"
+            className="card flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 transition-shadow hover:shadow-lift"
           >
-            <span className="w-12 text-lg font-bold text-emerald-800">
+            <span className="w-12 text-lg font-bold text-lake-700">
               {climb.grade}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{climb.name}</p>
-              <p className="truncate text-xs text-stone-500">
+              <p className="truncate font-semibold text-ink">{climb.name}</p>
+              <p className="truncate text-xs text-steel-500">
                 {[
                   climb.climb_type,
                   climb.wall_angle,
@@ -261,13 +253,13 @@ export default function LogbookPage() {
             >
               {SEND_LABELS[climb.send_type]}
             </span>
-            <span className="text-xs tabular-nums text-stone-400">
+            <span className="text-xs tabular-nums text-steel-400">
               {climb.climbed_on}
             </span>
             <button
               onClick={() => onDelete(climb.id)}
               aria-label={`Delete ${climb.name}`}
-              className="text-xs text-stone-400 hover:text-red-600"
+              className="text-xs text-steel-400 transition-colors hover:text-red-600"
             >
               ✕
             </button>

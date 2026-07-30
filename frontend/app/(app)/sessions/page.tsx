@@ -12,8 +12,7 @@ const TYPE_LABELS: Record<SessionType, string> = {
   other: "Other",
 };
 
-const inputCls =
-  "mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none";
+const inputCls = "field";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<TrainingSession[] | null>(null);
@@ -74,11 +73,8 @@ export default function SessionsPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Training sessions</h1>
-        <button
-          onClick={() => setShowForm((s) => !s)}
-          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
-        >
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Training sessions</h1>
+        <button onClick={() => setShowForm((s) => !s)} className="btn-primary">
           {showForm ? "Cancel" : "Log a session"}
         </button>
       </div>
@@ -88,7 +84,7 @@ export default function SessionsPage() {
       {showForm && (
         <form
           onSubmit={onSubmit}
-          className="mt-4 grid grid-cols-1 gap-4 rounded-xl border border-stone-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4"
+          className="card mt-4 grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4"
         >
           <label className="block">
             <span className="text-sm font-medium">Date</span>
@@ -144,7 +140,7 @@ export default function SessionsPage() {
                 onClick={() =>
                   setWorkout((w) => [...w, { exercise: "hangboard", detail: "", sets: 3 }])
                 }
-                className="text-sm font-medium text-emerald-700 hover:underline"
+                className="text-sm font-semibold text-lake-600 hover:text-lake-700 hover:underline"
               >
                 + Add set group
               </button>
@@ -154,7 +150,7 @@ export default function SessionsPage() {
                 <select
                   value={item.exercise}
                   onChange={(e) => updateWorkoutItem(i, { exercise: e.target.value })}
-                  className="rounded-md border border-stone-300 px-2 py-1.5 text-sm"
+                  className="rounded-lg border border-steel-200 bg-white px-2 py-1.5 text-sm focus:border-lake-500 focus:outline-none focus:ring-2 focus:ring-lake-500/30"
                 >
                   <option value="hangboard">Hangboard</option>
                   <option value="campus">Campus</option>
@@ -165,20 +161,20 @@ export default function SessionsPage() {
                   value={item.detail}
                   onChange={(e) => updateWorkoutItem(i, { detail: e.target.value })}
                   placeholder='e.g. "20mm 7/3 repeaters"'
-                  className="min-w-40 flex-1 rounded-md border border-stone-300 px-2 py-1.5 text-sm"
+                  className="min-w-40 flex-1 rounded-lg border border-steel-200 bg-white px-2 py-1.5 text-sm focus:border-lake-500 focus:outline-none focus:ring-2 focus:ring-lake-500/30"
                 />
                 <input
                   type="number"
                   min={1}
                   value={item.sets}
                   onChange={(e) => updateWorkoutItem(i, { sets: Number(e.target.value) })}
-                  className="w-16 rounded-md border border-stone-300 px-2 py-1.5 text-sm"
+                  className="w-16 rounded-lg border border-steel-200 bg-white px-2 py-1.5 text-sm focus:border-lake-500 focus:outline-none focus:ring-2 focus:ring-lake-500/30"
                 />
-                <span className="text-xs text-stone-500">sets</span>
+                <span className="text-xs text-steel-500">sets</span>
                 <button
                   type="button"
                   onClick={() => setWorkout((w) => w.filter((_, j) => j !== i))}
-                  className="text-xs text-stone-400 hover:text-red-600"
+                  className="text-xs text-steel-400 transition-colors hover:text-red-600"
                 >
                   remove
                 </button>
@@ -196,11 +192,7 @@ export default function SessionsPage() {
             />
           </label>
           <div className="sm:col-span-2 lg:col-span-4">
-            <button
-              type="submit"
-              disabled={busy}
-              className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
-            >
+            <button type="submit" disabled={busy} className="btn-primary">
               {busy ? "Saving…" : "Save session"}
             </button>
           </div>
@@ -208,45 +200,45 @@ export default function SessionsPage() {
       )}
 
       <div className="mt-4 space-y-2">
-        {sessions === null && <p className="text-sm text-stone-400">Loading…</p>}
+        {sessions === null && <p className="text-sm text-steel-400">Loading…</p>}
         {sessions?.length === 0 && (
-          <p className="rounded-xl border border-dashed border-stone-300 p-8 text-center text-sm text-stone-500">
+          <p className="rounded-2xl border border-dashed border-steel-300 bg-white/60 p-8 text-center text-sm text-steel-500">
             No sessions yet — log your first one!
           </p>
         )}
         {sessions?.map((session) => (
           <div
             key={session.id}
-            className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-stone-200 bg-white px-4 py-3"
+            className="card flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 transition-shadow hover:shadow-lift"
           >
-            <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-700">
+            <span className="rounded-full bg-sage-100 px-2.5 py-0.5 text-xs font-semibold text-sage-800">
               {TYPE_LABELS[session.session_type]}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">
+              <p className="text-sm font-semibold text-ink">
                 {session.duration_minutes} min
                 {session.rpe != null && (
-                  <span className="text-stone-500"> · RPE {session.rpe}</span>
+                  <span className="font-normal text-steel-500"> · RPE {session.rpe}</span>
                 )}
               </p>
               {(session.workout_details?.length ?? 0) > 0 && (
-                <p className="truncate text-xs text-stone-500">
+                <p className="truncate text-xs text-steel-500">
                   {session.workout_details!
                     .map((w) => `${w.exercise}: ${w.detail || "—"} ×${w.sets}`)
                     .join(" · ")}
                 </p>
               )}
               {session.notes && (
-                <p className="truncate text-xs text-stone-500">{session.notes}</p>
+                <p className="truncate text-xs text-steel-500">{session.notes}</p>
               )}
             </div>
-            <span className="text-xs tabular-nums text-stone-400">
+            <span className="text-xs tabular-nums text-steel-400">
               {session.session_date}
             </span>
             <button
               onClick={() => onDelete(session.id)}
               aria-label="Delete session"
-              className="text-xs text-stone-400 hover:text-red-600"
+              className="text-xs text-steel-400 transition-colors hover:text-red-600"
             >
               ✕
             </button>
