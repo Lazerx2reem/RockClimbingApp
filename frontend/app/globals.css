@@ -3,5 +3,28 @@
 @tailwind utilities;
 
 body {
-  @apply bg-stone-50 text-stone-900 antialiased;
+  @apply bg-mist font-sans text-ink antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@layer components {
+  /* Shared form control styling used across auth + logbook + sessions. */
+  .field {
+    @apply mt-1 w-full rounded-lg border border-steel-200 bg-white px-3 py-2 text-sm
+      text-ink shadow-sm transition-colors placeholder:text-steel-400
+      focus:border-lake-500 focus:outline-none focus:ring-2 focus:ring-lake-500/30;
+  }
+
+  /* Primary action button. */
+  .btn-primary {
+    @apply rounded-lg bg-lake-600 px-4 py-2 text-sm font-semibold text-white
+      shadow-sm transition-colors hover:bg-lake-700
+      focus:outline-none focus:ring-2 focus:ring-lake-500/40
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Surface card. */
+  .card {
+    @apply rounded-2xl border border-steel-200 bg-white shadow-card;
+  }
 }
