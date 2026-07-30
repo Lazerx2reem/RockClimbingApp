@@ -50,10 +50,10 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-ink">Dashboard</h1>
 
       {empty && (
-        <p className="mt-4 rounded-xl border border-dashed border-stone-300 p-8 text-center text-sm text-stone-500">
+        <p className="mt-4 rounded-2xl border border-dashed border-steel-300 bg-white/60 p-8 text-center text-sm text-steel-500">
           Nothing here yet — log a climb or a session to see your stats.
         </p>
       )}
@@ -74,18 +74,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <section className="rounded-xl border border-stone-200 bg-white p-4">
+            <section className="card p-5">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold">Grade pyramid</h2>
-                <div className="flex rounded-md border border-stone-200 p-0.5 text-xs font-medium">
+                <h2 className="font-semibold text-ink">Grade pyramid</h2>
+                <div className="flex rounded-lg border border-steel-200 bg-steel-50 p-0.5 text-xs font-medium">
                   {(["boulder", "route"] as const).map((d) => (
                     <button
                       key={d}
                       onClick={() => setDiscipline(d)}
-                      className={`rounded px-2.5 py-1 capitalize ${
+                      className={`rounded-md px-2.5 py-1 capitalize transition-colors ${
                         discipline === d
-                          ? "bg-emerald-700 text-white"
-                          : "text-stone-500 hover:bg-stone-100"
+                          ? "bg-lake-600 text-white shadow-sm"
+                          : "text-steel-500 hover:text-steel-700"
                       }`}
                     >
                       {d === "boulder" ? "Boulders" : "Routes"}
@@ -95,9 +95,9 @@ export default function DashboardPage() {
               </div>
               <div className="mt-4">
                 {pyramid === null ? (
-                  <p className="text-sm text-stone-400">Loading…</p>
+                  <p className="text-sm text-steel-400">Loading…</p>
                 ) : pyramid.length === 0 ? (
-                  <p className="text-sm text-stone-400">
+                  <p className="text-sm text-steel-400">
                     No {discipline === "boulder" ? "boulder" : "route"} sends yet.
                   </p>
                 ) : (
@@ -109,29 +109,29 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-stone-200 bg-white p-4">
-              <h2 className="font-semibold">Sends per month</h2>
+            <section className="card p-5">
+              <h2 className="font-semibold text-ink">Sends per month</h2>
               <div className="mt-4">
                 {progress === null ? (
-                  <p className="text-sm text-stone-400">Loading…</p>
+                  <p className="text-sm text-steel-400">Loading…</p>
                 ) : progress.length === 0 ? (
-                  <p className="text-sm text-stone-400">No sends yet.</p>
+                  <p className="text-sm text-steel-400">No sends yet.</p>
                 ) : (
                   <MonthlySends data={progress} />
                 )}
               </div>
             </section>
 
-            <section className="rounded-xl border border-stone-200 bg-white p-4 lg:col-span-2">
-              <h2 className="font-semibold">Volume by wall angle</h2>
-              <p className="text-xs text-stone-400">
+            <section className="card p-5 lg:col-span-2">
+              <h2 className="font-semibold text-ink">Volume by wall angle</h2>
+              <p className="text-xs text-steel-400">
                 All logged climbs with a recorded angle.
               </p>
               <div className="mt-4 max-w-md">
                 {angles === null ? (
-                  <p className="text-sm text-stone-400">Loading…</p>
+                  <p className="text-sm text-steel-400">Loading…</p>
                 ) : angles.length === 0 ? (
-                  <p className="text-sm text-stone-400">
+                  <p className="text-sm text-steel-400">
                     Tag climbs with a wall angle to see this.
                   </p>
                 ) : (

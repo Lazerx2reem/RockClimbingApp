@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Logo from "@/components/Logo";
 import { clearToken, getToken } from "@/lib/token";
 
 const NAV_LINKS = [
@@ -28,28 +29,29 @@ export default function AppLayout({
 
   if (!ready) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-stone-400">Loading…</p>
+      <main className="flex min-h-screen items-center justify-center bg-mist">
+        <p className="text-steel-400">Loading…</p>
       </main>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-stone-200 bg-white">
+    <div className="min-h-screen bg-mist">
+      <header className="sticky top-0 z-20 border-b border-steel-200 bg-white/85 backdrop-blur">
         <nav className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
-          <Link href="/dashboard" className="text-lg font-bold text-emerald-800">
-            Ascent
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Logo className="h-7 w-7" />
+            <span className="text-lg font-bold tracking-tight text-ink">Ascent</span>
           </Link>
           <div className="flex gap-1">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   pathname.startsWith(href)
-                    ? "bg-emerald-50 text-emerald-800"
-                    : "text-stone-600 hover:bg-stone-100"
+                    ? "bg-lake-50 text-lake-700"
+                    : "text-steel-500 hover:bg-steel-100 hover:text-steel-700"
                 }`}
               >
                 {label}
@@ -61,13 +63,13 @@ export default function AppLayout({
               clearToken();
               router.replace("/login");
             }}
-            className="ml-auto rounded-md px-3 py-1.5 text-sm text-stone-500 hover:bg-stone-100"
+            className="ml-auto rounded-lg px-3 py-1.5 text-sm text-steel-500 transition-colors hover:bg-steel-100 hover:text-steel-700"
           >
             Log out
           </button>
         </nav>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
     </div>
   );
 }

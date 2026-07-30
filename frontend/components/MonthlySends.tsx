@@ -34,11 +34,11 @@ export default function MonthlySends({ data }: { data: ProgressPoint[] }) {
             className="absolute inset-x-0 flex items-center gap-2"
             style={{ bottom: `${(t / top) * 100}%` }}
           >
-            <span className="w-5 -translate-y-px text-right text-[10px] tabular-nums text-stone-400">
+            <span className="w-5 -translate-y-px text-right text-[10px] tabular-nums text-steel-400">
               {t}
             </span>
             <div
-              className={`h-px flex-1 ${t === 0 ? "bg-stone-300" : "bg-stone-200"}`}
+              className={`h-px flex-1 ${t === 0 ? "bg-steel-300" : "bg-steel-200"}`}
             />
           </div>
         ))}
@@ -52,13 +52,13 @@ export default function MonthlySends({ data }: { data: ProgressPoint[] }) {
               onMouseLeave={() => setHover(null)}
             >
               <div
-                className={`w-full max-w-6 rounded-t ${
-                  hover === i ? "bg-emerald-800" : "bg-emerald-700"
+                className={`w-full max-w-6 rounded-t transition-colors ${
+                  hover === i ? "bg-lake-700" : "bg-lake-600"
                 }`}
                 style={{ height: `${(point.sends / top) * 100}%` }}
               />
               {hover === i && (
-                <div className="pointer-events-none absolute bottom-full z-10 mb-1 whitespace-nowrap rounded-md bg-stone-900 px-2 py-1 text-xs text-white">
+                <div className="pointer-events-none absolute bottom-full z-10 mb-1 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-xs text-white shadow-lift">
                   {monthLabel(point.month)} {point.month.slice(0, 4)}:{" "}
                   <span className="font-semibold">{point.sends}</span> sends
                 </div>
@@ -72,7 +72,7 @@ export default function MonthlySends({ data }: { data: ProgressPoint[] }) {
         {data.map((point) => (
           <span
             key={point.month}
-            className="flex-1 text-center text-[10px] text-stone-400"
+            className="flex-1 text-center text-[10px] text-steel-400"
           >
             {monthLabel(point.month)}
           </span>
