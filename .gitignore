@@ -15,5 +15,8 @@ __pycache__/
 .env.local
 *.db
 
+# Uploaded videos (object storage — local-disk backend in dev)
+backend/media/
+
 # OS / editor
 .DS_Store
