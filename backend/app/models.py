@@ -1,6 +1,16 @@
 from datetime import date, datetime
 
-from sqlalchemy import JSON, Date, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    JSON,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -27,6 +37,9 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
     sessions: Mapped[list["TrainingSession"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    videos: Mapped[list["Video"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -103,3 +116,78 @@ class TrainingSession(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="sessions")
+
+
+class Video(Base):
+    """An uploaded climbing attempt video, optionally attached to a logged climb.
+
+    Files live in object storage (local disk in dev, S3-compatible in prod);
+    this row only holds the storage key and probed metadata. Pose analysis runs
+    asynchronously after upload and its result is a separate PoseAnalysis row.
+    """
+
+    __tablename__ = "videos"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    # Optional link to the climb this attempt was on.
+    climb_id: Mapped[int | None] = mapped_column(
+        ForeignKey("climbs.id", ondelete="SET NULL"), index=True
+    )
+    original_filename: Mapped[str] = mapped_column(String(255))
+    storage_key: Mapped[str] = mapped_column(String(255), unique=True)
+    content_type: Mapped[str] = mapped_column(String(60))
+    size_bytes: Mapped[int] = mapped_column(Integer)
+    # Probed after upload; null until the analyzer reads the file.
+    duration_seconds: Mapped[float | None] = mapped_column(Float)
+    fps: Mapped[float | None] = mapped_column(Float)
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    # uploaded -> processing -> analyzed | failed
+    status: Mapped[str] = mapped_column(String(12), default="uploaded", index=True)
+    error_message: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    user: Mapped[User] = relationship(back_populates="videos")
+    analysis: Mapped["PoseAnalysis | None"] = relationship(
+        back_populates="video", cascade="all, delete-orphan", uselist=False
+    )
+
+
+class PoseAnalysis(Base):
+    """Result of running MediaPipe Pose + biomechanics heuristics over a video.
+
+    - keypoints: a downsampled per-frame landmark track (list of frames, each a
+      dict of joint -> [x, y, visibility] in normalized image coords).
+    - metrics: computed scalar metrics (hip position, COG travel, foot control,
+      body tension), each with a value and 0-100 score.
+    - feedback: ordered, human-readable coaching notes derived from the metrics.
+    """
+
+    __tablename__ = "pose_analysis_results"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    video_id: Mapped[int] = mapped_column(
+        ForeignKey("videos.id", ondelete="CASCADE"), unique=True, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    frame_count: Mapped[int] = mapped_column(Integer)
+    analyzed_fps: Mapped[float] = mapped_column(Float)
+    # Overall movement-quality score, 0-100, averaged across metrics.
+    overall_score: Mapped[int] = mapped_column(Integer)
+    keypoints: Mapped[list | None] = mapped_column(JSON)
+    metrics: Mapped[dict] = mapped_column(JSON)
+    feedback: Mapped[list] = mapped_column(JSON)
+    # "mediapipe" for a real analyzed video, "synthetic" for generated dev data.
+    source: Mapped[str] = mapped_column(String(12), default="mediapipe")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    video: Mapped[Video] = relationship(back_populates="analysis")
