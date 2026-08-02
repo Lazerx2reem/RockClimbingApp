@@ -158,3 +158,68 @@ class StatsSummary(BaseModel):
     total_hours: float
     hardest_boulder: str | None
     hardest_route: str | None
+
+
+# ---------- Videos & pose analysis ----------
+
+
+class PoseMetricOut(BaseModel):
+    key: str
+    label: str
+    value: float
+    unit: str
+    score: int
+    summary: str
+
+
+class PoseFeedbackOut(BaseModel):
+    category: str
+    severity: str  # good / warn / poor
+    title: str
+    message: str
+    score: int
+
+
+class PoseAnalysisSummary(BaseModel):
+    """Lightweight analysis view for list rows."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    overall_score: int
+    source: str
+
+
+class PoseAnalysisOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    overall_score: int
+    frame_count: int
+    analyzed_fps: float
+    source: str
+    metrics: dict[str, PoseMetricOut]
+    feedback: list[PoseFeedbackOut]
+    created_at: datetime
+
+
+class VideoOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    original_filename: str
+    climb_id: int | None
+    status: str  # uploaded / processing / analyzed / failed
+    error_message: str | None
+    size_bytes: int
+    duration_seconds: float | None
+    fps: float | None
+    width: int | None
+    height: int | None
+    created_at: datetime
+    analysis: PoseAnalysisSummary | None = None
+
+
+class VideoDetailOut(VideoOut):
+    # Overrides the summary with the full analysis payload.
+    analysis: PoseAnalysisOut | None = None

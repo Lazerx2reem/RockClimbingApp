@@ -72,6 +72,10 @@ class LocalStorage:
     def exists(self, key: str) -> bool:
         return self._full(key).exists()
 
+    def path(self, key: str) -> str:
+        """Stable on-disk path (local backend only) — used for range streaming."""
+        return str(self._full(key))
+
     @contextmanager
     def local_path(self, key: str) -> Iterator[str]:
         yield str(self._full(key))
