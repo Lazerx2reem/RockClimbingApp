@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/logbook", label: "Logbook" },
   { href: "/sessions", label: "Sessions" },
+  { href: "/videos", label: "Analysis" },
 ];
 
 export default function AppLayout({
