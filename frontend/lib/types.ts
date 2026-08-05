@@ -75,3 +75,64 @@ export interface StatsSummary {
   hardest_boulder: string | null;
   hardest_route: string | null;
 }
+
+// ---------- Videos & pose analysis ----------
+
+export type VideoStatus = "uploaded" | "processing" | "analyzed" | "failed";
+export type FeedbackSeverity = "good" | "warn" | "poor";
+
+export interface PoseMetric {
+  key: string;
+  label: string;
+  value: number;
+  unit: string;
+  score: number;
+  summary: string;
+}
+
+export interface PoseFeedback {
+  category: string;
+  severity: FeedbackSeverity;
+  title: string;
+  message: string;
+  score: number;
+}
+
+export interface PoseAnalysisSummary {
+  id: number;
+  overall_score: number;
+  source: string;
+}
+
+export interface PoseAnalysis {
+  id: number;
+  overall_score: number;
+  frame_count: number;
+  analyzed_fps: number;
+  source: string;
+  metrics: Record<string, PoseMetric>;
+  feedback: PoseFeedback[];
+  created_at: string;
+}
+
+interface VideoBase {
+  id: number;
+  original_filename: string;
+  climb_id: number | null;
+  status: VideoStatus;
+  error_message: string | null;
+  size_bytes: number;
+  duration_seconds: number | null;
+  fps: number | null;
+  width: number | null;
+  height: number | null;
+  created_at: string;
+}
+
+export interface VideoSummary extends VideoBase {
+  analysis: PoseAnalysisSummary | null;
+}
+
+export interface VideoDetail extends VideoBase {
+  analysis: PoseAnalysis | null;
+}

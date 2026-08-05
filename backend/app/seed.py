@@ -11,9 +11,11 @@ from datetime import date, timedelta
 
 from sqlalchemy import select
 
+from .analysis.service import analyze_synthetic
 from .auth import hash_password
 from .database import SessionLocal
-from .models import Climb, TrainingSession, User
+from .models import Climb, TrainingSession, User, Video
+from .storage import new_storage_key
 
 DEMO_EMAIL = "demo@ascent.app"
 DEMO_PASSWORD = "demo1234"
@@ -52,8 +54,10 @@ def seed() -> None:
     random.seed(42)
     db = SessionLocal()
     try:
-        if db.scalar(select(User).where(User.email == DEMO_EMAIL)) is not None:
-            print(f"Demo user {DEMO_EMAIL} already exists - nothing to do.")
+        existing = db.scalar(select(User).where(User.email == DEMO_EMAIL))
+        if existing is not None:
+            print(f"Demo user {DEMO_EMAIL} already exists - skipping climbs/sessions.")
+            _seed_sample_videos(db, existing)
             return
 
         user = User(
@@ -166,8 +170,38 @@ def seed() -> None:
             f"Seeded {DEMO_EMAIL} (password: {DEMO_PASSWORD}) with "
             f"{climb_count} climbs and {session_count} sessions."
         )
+        _seed_sample_videos(db, user)
     finally:
         db.close()
+
+
+# Three demo attempts spanning a range of movement quality, so the analysis
+# feature is populated on the demo account without any real upload.
+SAMPLE_VIDEOS = [
+    ("overhang-project-attempt.mp4", 0.85),
+    ("slab-warmup.mp4", 0.6),
+    ("crux-fall-take3.mp4", 0.4),
+]
+
+
+def _seed_sample_videos(db, user: User) -> None:
+    """Attach a few synthetic analyzed videos to the demo user, if they have none."""
+    already = db.scalar(select(Video).where(Video.user_id == user.id))
+    if already is not None:
+        return
+    for seed_i, (filename, skill) in enumerate(SAMPLE_VIDEOS):
+        video = Video(
+            user_id=user.id,
+            original_filename=filename,
+            storage_key=new_storage_key("sample.mp4"),
+            content_type="video/mp4",
+            size_bytes=0,
+            status="uploaded",
+        )
+        db.add(video)
+        db.flush()
+        analyze_synthetic(db, video, seed=1000 + seed_i, skill=skill)
+    print(f"Added {len(SAMPLE_VIDEOS)} sample analyzed videos.")
 
 
 if __name__ == "__main__":
