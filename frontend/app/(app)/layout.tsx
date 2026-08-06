@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/logbook", label: "Logbook" },
   { href: "/sessions", label: "Sessions" },
   { href: "/videos", label: "Analysis" },
+  { href: "/coach", label: "Coach" },
 ];
 
 export default function AppLayout({

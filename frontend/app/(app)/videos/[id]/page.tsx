@@ -162,8 +162,12 @@ export default function VideoDetailPage() {
                 ))}
               </div>
               <p className="mt-4 text-xs text-steel-400">
-                Heuristic analysis for guidance, not a substitute for a coach's eye.
-                A conversational AI coach that builds on these results is coming next.
+                Heuristic analysis for guidance, not a substitute for a coach&apos;s eye.
+                Ask the{" "}
+                <Link href="/coach" className="font-medium text-lake-700 hover:underline">
+                  coach
+                </Link>{" "}
+                about these results to dig into what to do about them.
               </p>
             </section>
           </div>
