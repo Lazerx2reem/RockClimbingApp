@@ -21,5 +21,19 @@ class Settings(BaseSettings):
         "video/x-matroska",  # .mkv
     ]
 
+    # AI coach (phase 3). Without a key the coach endpoints return 503 and the
+    # rest of the app is unaffected.
+    anthropic_api_key: str | None = None
+    coach_model: str = "claude-opus-5"
+    # Caps thinking + reply together; a coaching turn rarely needs more.
+    coach_max_tokens: int = 8000
+    # Interactive chat — "medium" keeps replies snappy. Raise to "high" for
+    # deeper reasoning at the cost of latency.
+    coach_effort: str = "medium"
+    # Ceiling on tool round-trips per turn, so a loop can't run away.
+    coach_max_tool_rounds: int = 6
+    # Prior turns replayed to the model on each request.
+    coach_history_limit: int = 30
+
 
 settings = Settings()
