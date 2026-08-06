@@ -42,6 +42,9 @@ class User(Base):
     videos: Mapped[list["Video"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    conversations: Mapped[list["Conversation"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class Climb(Base):
@@ -191,3 +194,60 @@ class PoseAnalysis(Base):
     )
 
     video: Mapped[Video] = relationship(back_populates="analysis")
+
+
+class Conversation(Base):
+    """A coach chat thread. Holds the transcript the AI coach is replying within."""
+
+    __tablename__ = "conversations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    # Auto-derived from the first user message; editable later.
+    title: Mapped[str] = mapped_column(String(120), default="New conversation")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    # Bumped on every new message so the sidebar can sort by recency.
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    user: Mapped[User] = relationship(back_populates="conversations")
+    messages: Mapped[list["CoachMessage"]] = relationship(
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        order_by="CoachMessage.id",
+    )
+
+
+class CoachMessage(Base):
+    """One turn in a coach conversation.
+
+    Only the final rendered text is persisted — intermediate tool_use blocks are
+    resolved within a single turn and never replayed, so the transcript we send
+    back to the model on later turns is plain role/content pairs. `tool_calls`
+    keeps the names + inputs of whatever the coach looked up, purely so the UI
+    can show what it consulted.
+    """
+
+    __tablename__ = "coach_messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    role: Mapped[str] = mapped_column(String(10))  # user / assistant
+    content: Mapped[str] = mapped_column(Text)
+    # e.g. [{"name": "get_recent_climbs", "input": {"days": 30}}]
+    tool_calls: Mapped[list | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    conversation: Mapped[Conversation] = relationship(back_populates="messages")
