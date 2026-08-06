@@ -16,7 +16,7 @@ AI-powered video analysis of climbing attempts.
 
 - [x] **Phase 1** — auth, logbook, session tracker, stats dashboard
 - [x] **Phase 2** — video upload + pose-analysis pipeline
-- [ ] **Phase 3** — AI coach chat
+- [x] **Phase 3** — AI coach chat
 - [ ] **Phase 4** — weakness detection + training plan generator
 - [ ] **Phase 5** — stretch features (board import, conditions, community feed)
 
@@ -74,9 +74,35 @@ and unit-tested independently of MediaPipe.
 cd backend && .venv/bin/pytest      # metrics + video API tests
 ```
 
+## AI coach (phase 3)
+
+Under **Coach**, chat with a climbing coach backed by the Claude API. It isn't
+given a canned summary of your training — it holds tools over your own data
+(`get_training_summary`, `get_recent_climbs`, `get_grade_pyramid`,
+`get_recent_sessions`, `list_video_analyses`, `get_video_analysis`) and decides
+what to read to answer the question. Every tool is scoped to the authenticated
+user, so a conversation can only ever reach your own rows. The UI shows what it
+consulted above each reply.
+
+Replies stream over SSE, because a turn may take several tool round-trips before
+the first word exists. Conversations persist, so you can pick one back up later.
+
+Set `ANTHROPIC_API_KEY` in `backend/.env` to enable it — without a key the coach
+page explains what's missing and the rest of the app is unaffected. Model and
+reasoning effort are configurable (`COACH_MODEL`, `COACH_EFFORT`).
+
+```bash
+cd backend && .venv/bin/pytest tests/test_coach.py   # tools, prompt, SSE plumbing
+```
+
+The tests fake the model turn, so the suite needs no API key.
+
 ## Configuration
 
 Backend reads `.env` (see `backend/.env.example`): `DATABASE_URL`, `JWT_SECRET`.
 Uploaded videos use a pluggable store — local disk under `media/` in dev
 (`STORAGE_BACKEND`, `MEDIA_ROOT`, `MAX_UPLOAD_MB`), S3-shaped for later.
+The coach reads `ANTHROPIC_API_KEY`, plus optional `COACH_MODEL`,
+`COACH_EFFORT`, `COACH_MAX_TOKENS`, `COACH_MAX_TOOL_ROUNDS`, and
+`COACH_HISTORY_LIMIT`.
 Frontend reads `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000`).
