@@ -3,6 +3,10 @@ import type {
   AngleEntry,
   Climb,
   ClimbCreate,
+  CoachStatus,
+  CoachStreamEvent,
+  Conversation,
+  ConversationDetail,
   ProgressPoint,
   PyramidEntry,
   SessionCreate,
@@ -98,6 +102,54 @@ async function upload<T>(path: string, form: FormData): Promise<T> {
   return res.json();
 }
 
+/** POST that yields server-sent events as they arrive.
+ *
+ * EventSource can't send an Authorization header, so this reads the response
+ * body itself and splits on the SSE frame separator. Frames can straddle chunk
+ * boundaries, hence the buffer.
+ */
+async function* sseStream<T>(path: string, body: unknown): AsyncGenerator<T> {
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError(0, "Cannot reach the Ascent API. Is the backend running?");
+  }
+
+  if (handleUnauthorized(res, path)) {
+    throw new ApiError(401, "Session expired. Please log in again.");
+  }
+  if (!res.ok) throw await toApiError(res);
+  if (!res.body) throw new ApiError(0, "Streaming is not supported by this browser.");
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let split: number;
+    while ((split = buffer.indexOf("\n\n")) !== -1) {
+      const frame = buffer.slice(0, split);
+      buffer = buffer.slice(split + 2);
+      for (const line of frame.split("\n")) {
+        if (line.startsWith("data: ")) yield JSON.parse(line.slice(6)) as T;
+      }
+    }
+  }
+}
+
 /** Fetch an authorized binary resource as an object URL, or null if absent. */
 async function fetchObjectUrl(path: string): Promise<string | null> {
   const token = getToken();
@@ -159,4 +211,19 @@ export const api = {
     request<VideoSummary>(`/videos/${id}/reanalyze`, { method: "POST" }),
   deleteVideo: (id: number) => request<void>(`/videos/${id}`, { method: "DELETE" }),
   videoFileUrl: (id: number) => fetchObjectUrl(`/videos/${id}/file`),
+
+  coachStatus: () => request<CoachStatus>("/coach/status"),
+  listConversations: () => request<Conversation[]>("/coach/conversations"),
+  createConversation: (title?: string) =>
+    request<ConversationDetail>("/coach/conversations", {
+      method: "POST",
+      body: JSON.stringify({ title: title ?? null }),
+    }),
+  getConversation: (id: number) =>
+    request<ConversationDetail>(`/coach/conversations/${id}`),
+  deleteConversation: (id: number) =>
+    request<void>(`/coach/conversations/${id}`, { method: "DELETE" }),
+  /** Streams the coach's reply — iterate the returned generator. */
+  sendCoachMessage: (id: number, content: string) =>
+    sseStream<CoachStreamEvent>(`/coach/conversations/${id}/messages`, { content }),
 };

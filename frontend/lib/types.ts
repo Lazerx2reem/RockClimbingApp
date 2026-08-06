@@ -136,3 +136,41 @@ export interface VideoSummary extends VideoBase {
 export interface VideoDetail extends VideoBase {
   analysis: PoseAnalysis | null;
 }
+
+// ---------- AI coach ----------
+
+export interface CoachToolCall {
+  name: string;
+  input: Record<string, unknown>;
+}
+
+export interface CoachMessage {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  tool_calls: CoachToolCall[] | null;
+  created_at: string;
+}
+
+export interface Conversation {
+  id: number;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationDetail extends Conversation {
+  messages: CoachMessage[];
+}
+
+export interface CoachStatus {
+  available: boolean;
+  model: string;
+}
+
+/** One frame of the coach reply stream. */
+export type CoachStreamEvent =
+  | { type: "delta"; text: string }
+  | { type: "tool"; name: string }
+  | { type: "done"; message_id: number }
+  | { type: "error"; message: string };
