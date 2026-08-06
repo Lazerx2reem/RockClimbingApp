@@ -223,3 +223,44 @@ class VideoOut(BaseModel):
 class VideoDetailOut(VideoOut):
     # Overrides the summary with the full analysis payload.
     analysis: PoseAnalysisOut | None = None
+
+
+# ---------- AI coach ----------
+
+
+class CoachToolCall(BaseModel):
+    name: str
+    input: dict = Field(default_factory=dict)
+
+
+class CoachMessageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    role: str  # user / assistant
+    content: str
+    tool_calls: list[CoachToolCall] | None = None
+    created_at: datetime
+
+
+class ConversationOut(BaseModel):
+    """List row — no transcript."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class ConversationDetailOut(ConversationOut):
+    messages: list[CoachMessageOut] = Field(default_factory=list)
+
+
+class ConversationCreate(BaseModel):
+    title: str | None = Field(default=None, max_length=120)
+
+
+class CoachMessageCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=4000)
